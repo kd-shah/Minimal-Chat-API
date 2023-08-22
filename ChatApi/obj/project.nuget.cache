@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "VVJJAv2oXuUe+s11DpU2YJ+4NIi9J6caHxvyOdiumkxuEH4BRM4YC2nNq9a/kqbDJZF/lT0LMHtNMt3UJeRcUw==",
+  "dgSpecHash": "c5+frFkVhp1lEkOY9JCATAzyN0ivou6EY1HEqTZvhKqo7pPYonLpGKg/iVbN0ay8WjbCCV6SI0ahNhbJA+JB8w==",
   "success": true,
-  "projectFilePath": "C:\\Users\\promact\\Desktop\\Final Project\\LegalGenAI\\Back End\\ChatApi\\ChatApi.csproj",
+  "projectFilePath": "C:\\Users\\promact\\Desktop\\Internship\\Assignment Minimal Chat Application\\Backend\\ChatApi\\ChatApi.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\promact\\.nuget\\packages\\azure.core\\1.24.0\\azure.core.1.24.0.nupkg.sha512",
     "C:\\Users\\promact\\.nuget\\packages\\azure.identity\\1.6.0\\azure.identity.1.6.0.nupkg.sha512",

@@ -3,7 +3,13 @@ using ChatApi.Helper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.IdentityModel.Tokens.Jwt;
+using System.Text;
 using System.Text.RegularExpressions;
+using System;
+using System.Security.Claims;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.AspNetCore.Authorization;
 
 namespace ChatApi.Controllers
 {
@@ -12,9 +18,11 @@ namespace ChatApi.Controllers
     public class UserController : ControllerBase
     {
         private readonly ChatDbContext _authContext;
-        public UserController(ChatDbContext chatDbContext)
+        private readonly IHttpContextAccessor _httpContextAccessor;
+        public UserController(ChatDbContext chatDbContext, IHttpContextAccessor httpContextAccessor)
         {
             _authContext = chatDbContext;
+            _httpContextAccessor = httpContextAccessor;
         }
 
         [HttpPost("authenticate")]
@@ -30,9 +38,17 @@ namespace ChatApi.Controllers
             //    return BadRequest(new { Message = "Invalid password format" });
 
 
-            var user = await _authContext.Users.FirstOrDefaultAsync(x => x.email == UserObj.email && x.password == UserObj.password);
+            var user = await _authContext.Users.FirstOrDefaultAsync(x => x.email == UserObj.email);
             if (user == null)
                 return NotFound(new { Message = "Login failed due to incorrect credentials" });
+
+            if (!PasswordHasher.VerifyPassword(UserObj.password, user.password))
+            {
+                return BadRequest(new
+                {
+                    Message = "Incorrect Password"
+                });
+            }
 
             var userRes = new
             {
@@ -42,11 +58,13 @@ namespace ChatApi.Controllers
 
             };
 
+            user.token = CreateJwt(user);
 
             return Ok(new
             {
                 Message = " Login Success",
-                UserInfo = userRes
+                UserInfo = userRes,
+                token = user.token
             });
         }
 
@@ -87,6 +105,8 @@ namespace ChatApi.Controllers
 
         }
 
+        
+
         private bool IsValidEmail(string email)
         {
             return Regex.IsMatch(email, @"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$");
@@ -100,6 +120,36 @@ namespace ChatApi.Controllers
 
             return true;
         }
+
+        private string CreateJwt(Model.User user)
+        {
+            var jwtTokenHandler = new JwtSecurityTokenHandler();
+            var key = Encoding.ASCII.GetBytes("It Is A Secret Key Which Should Not Be Shared With Other Users.....");
+
+            var claims = new List<Claim>
+    {
+            new Claim(ClaimTypes.Name, user.name),
+            new Claim(ClaimTypes.NameIdentifier, user.id.ToString())
+    };
+            var identity = new ClaimsIdentity(claims);
+            
+
+            var credentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256);
+
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = identity,
+                Expires = DateTime.Now.AddDays(1),
+                SigningCredentials = credentials,
+            };
+
+            var token = jwtTokenHandler.CreateToken(tokenDescriptor);
+
+            return jwtTokenHandler.WriteToken(token);
+        }
+
+        
+
 
 
 

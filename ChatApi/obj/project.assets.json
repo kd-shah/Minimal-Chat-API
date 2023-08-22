@@ -3960,11 +3960,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\promact\\Desktop\\Final Project\\LegalGenAI\\Back End\\ChatApi\\ChatApi.csproj",
+      "projectUniqueName": "C:\\Users\\promact\\Desktop\\Internship\\Assignment Minimal Chat Application\\Backend\\ChatApi\\ChatApi.csproj",
       "projectName": "ChatApi",
-      "projectPath": "C:\\Users\\promact\\Desktop\\Final Project\\LegalGenAI\\Back End\\ChatApi\\ChatApi.csproj",
+      "projectPath": "C:\\Users\\promact\\Desktop\\Internship\\Assignment Minimal Chat Application\\Backend\\ChatApi\\ChatApi.csproj",
       "packagesPath": "C:\\Users\\promact\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\promact\\Desktop\\Final Project\\LegalGenAI\\Back End\\ChatApi\\obj\\",
+      "outputPath": "C:\\Users\\promact\\Desktop\\Internship\\Assignment Minimal Chat Application\\Backend\\ChatApi\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "C:\\Users\\promact\\AppData\\Roaming\\NuGet\\NuGet.Config",
