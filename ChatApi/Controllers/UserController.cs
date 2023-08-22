@@ -105,7 +105,33 @@ namespace ChatApi.Controllers
 
         }
 
-        
+        [Authorize]
+        [HttpGet]
+        public async Task<ActionResult<Model.User>> GetAllUsers()
+        {
+
+
+            var currentUser = GetCurrentLoggedInUser();
+
+            if (currentUser == null)
+            {
+                return BadRequest(new { Message = "Unable to retrieve current user." });
+            }
+
+            var userList = await _authContext.Users
+        .Where(u => u.id != currentUser.id)
+        .Select(u => new
+        {
+            id = u.id,
+            name = u.name,
+            email = u.email,
+        })
+        .ToListAsync();
+
+            return Ok(new { users = userList });
+        }
+
+
 
         private bool IsValidEmail(string email)
         {
@@ -148,7 +174,18 @@ namespace ChatApi.Controllers
             return jwtTokenHandler.WriteToken(token);
         }
 
-        
+        private Model.User GetCurrentLoggedInUser()
+        {
+            var userIdClaim = _httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier);
+
+            if (userIdClaim != null && int.TryParse(userIdClaim.Value, out int userId))
+            {
+                var currentUser = _authContext.Users.FirstOrDefault(u => u.id == userId);
+                return currentUser;
+            }
+
+            return null;
+        }
 
 
 
