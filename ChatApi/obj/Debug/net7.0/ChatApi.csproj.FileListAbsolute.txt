@@ -152,3 +152,6 @@ C:\Users\promact\Desktop\Internship\Assignment Minimal Chat Application\Backend\
 C:\Users\promact\Desktop\Internship\Assignment Minimal Chat Application\Backend\ChatApi\obj\Debug\net7.0\ChatApi.pdb
 C:\Users\promact\Desktop\Internship\Assignment Minimal Chat Application\Backend\ChatApi\obj\Debug\net7.0\ChatApi.genruntimeconfig.cache
 C:\Users\promact\Desktop\Internship\Assignment Minimal Chat Application\Backend\ChatApi\obj\Debug\net7.0\ref\ChatApi.dll
+C:\Users\promact\Desktop\Internship\Assignment Minimal Chat Application\Backend\ChatApi\bin\Debug\net7.0\Scrutor.dll
+C:\Users\promact\Desktop\Internship\Assignment Minimal Chat Application\Backend\ChatApi\bin\Debug\net7.0\Swashbuckle.AspNetCore.Filters.dll
+C:\Users\promact\Desktop\Internship\Assignment Minimal Chat Application\Backend\ChatApi\bin\Debug\net7.0\Swashbuckle.AspNetCore.Filters.Abstractions.dll
