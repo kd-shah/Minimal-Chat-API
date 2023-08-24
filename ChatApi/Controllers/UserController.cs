@@ -13,7 +13,7 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace ChatApi.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/")]
     [ApiController]
     public class UserController : ControllerBase
     {
@@ -25,8 +25,8 @@ namespace ChatApi.Controllers
             _httpContextAccessor = httpContextAccessor;
         }
 
-        [HttpPost("authenticate")]
-        public async Task<IActionResult> Authenticate([FromBody] Model.User UserObj)
+        [HttpPost("login")]
+        public async Task<IActionResult> Authenticate([FromBody] Model.LoginDto UserObj)
         {
             if (UserObj == null)
                 return BadRequest();
@@ -52,7 +52,7 @@ namespace ChatApi.Controllers
 
             var userRes = new
             {
-                id = user.id,
+                id = user.userId,
                 name = user.name,
                 email = user.email,
 
@@ -69,7 +69,7 @@ namespace ChatApi.Controllers
         }
 
         [HttpPost("register")]
-        public async Task<IActionResult> RegisterUser([FromBody] Model.User UserObj)
+        public async Task<IActionResult> RegisterUser([FromBody] Model.RegisterRequestDto UserObj)
         {
             if (UserObj == null)
                 return BadRequest();
@@ -84,29 +84,38 @@ namespace ChatApi.Controllers
                 return Conflict(new { message = "Registration failed because the email is already registered" });
 
             UserObj.password = PasswordHasher.HashPassword(UserObj.password);
-            UserObj.token = "";
 
-            await _authContext.Users.AddAsync(UserObj);
-            await _authContext.SaveChangesAsync();
 
-            var userRes = new
+            var newUser = new Model.User
             {
-                id = UserObj.id,
                 name = UserObj.name,
                 email = UserObj.email,
+                password = UserObj.password,
+                token = ""
 
             };
+
+            _authContext.Users.Add(newUser);
+            await _authContext.SaveChangesAsync();
+
+            var userResponse = new
+            {
+                id = newUser.userId,
+                name = newUser.name,
+                email = newUser.email,
+            };
+
 
             return Ok(new
             {
                 Message = "User Registered",
-                UserInfo = userRes,
+                UserInfo = userResponse,
             });
 
         }
 
         [Authorize]
-        [HttpGet]
+        [HttpGet("users")]
         public async Task<ActionResult<Model.User>> GetAllUsers()
         {
 
@@ -119,10 +128,10 @@ namespace ChatApi.Controllers
             }
 
             var userList = await _authContext.Users
-        .Where(u => u.id != currentUser.id)
+        .Where(u => u.userId != currentUser.userId)
         .Select(u => new
         {
-            id = u.id,
+            id = u.userId,
             name = u.name,
             email = u.email,
         })
@@ -155,7 +164,7 @@ namespace ChatApi.Controllers
             var claims = new List<Claim>
     {
             new Claim(ClaimTypes.Name, user.name),
-            new Claim(ClaimTypes.NameIdentifier, user.id.ToString())
+            new Claim(ClaimTypes.NameIdentifier, user.userId.ToString())
     };
             var identity = new ClaimsIdentity(claims);
             
@@ -180,7 +189,7 @@ namespace ChatApi.Controllers
 
             if (userIdClaim != null && int.TryParse(userIdClaim.Value, out int userId))
             {
-                var currentUser = _authContext.Users.FirstOrDefault(u => u.id == userId);
+                var currentUser = _authContext.Users.FirstOrDefault(u => u.userId == userId);
                 return currentUser;
             }
 

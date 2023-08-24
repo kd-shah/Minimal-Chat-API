@@ -1,8 +1,7 @@
 ﻿namespace ChatApi.Model
 {
-    public class RequestMessageDto
+    public class SendMessageDto
     {
-        public int receiverId { get; set; }
         public string content { get; set; }
     }
 }

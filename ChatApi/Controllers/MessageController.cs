@@ -6,11 +6,13 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
+using System.Text.Json.Serialization;
+using System.Text.Json;
 
 namespace ChatApi.Controllers
 {
     [Authorize]
-    [Route("api/[controller]")]
+    [Route("api/messages")]
     [ApiController]
     public class MessageController : ControllerBase
     {
@@ -23,7 +25,7 @@ namespace ChatApi.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> SendMessage([FromBody] RequestMessageDto request)
+        public async Task<IActionResult> SendMessage(int receiverId, [FromBody] SendMessageDto request)
         {
 
             if (request == null)
@@ -33,22 +35,40 @@ namespace ChatApi.Controllers
 
 
 
-            var messageId = Guid.NewGuid();
+            //var messageId = Guid.NewGuid();
             var senderId = _httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            var receiverId = request.receiverId;
+
+            var sender = await _context.Users.FindAsync(Convert.ToInt32(senderId));
+            if (sender == null)
+            {
+                return NotFound("Sender not found");
+            }
+
+
+            //var receiverId = request.receiverId;
+            var receiver = await _context.Users.FindAsync(receiverId);
+            if (receiver == null)
+            {
+                return NotFound("Receiver not found");
+            }
+
             var content = request.content;
             var timestamp = DateTime.Now;
 
             var message = new Message
             {
 
-                senderId = Convert.ToInt32(senderId),
-                receiverId = receiverId,
+                //senderId = Convert.ToInt32(senderId),
+                sender = sender,
+
+                //receiverId = receiverId,
+                receiver = receiver,
+
                 content = content,
                 timestamp = timestamp,
             };
 
-            if (!await _context.Users.AnyAsync(u => u.id == receiverId))
+            if (!await _context.Users.AnyAsync(u => u.userId == receiverId))
                 return Conflict(new { message = "User does not exist" });
 
 
@@ -58,9 +78,9 @@ namespace ChatApi.Controllers
 
             var response = new
             {
-                messageId = messageId,
-                senderId = senderId,
-                receiverId = receiverId,
+                messageId = message.messageId,
+                senderId = sender.userId,
+                receiverId = receiver.userId,
                 content = content,
                 timestamp = timestamp
             };
@@ -68,8 +88,8 @@ namespace ChatApi.Controllers
             return Ok(response);
         }
 
-        [HttpPut]
-        [Route("api/messages/{messageId}")]
+        [HttpPut ("{messageId}")]
+        
         public async Task<IActionResult> EditMessage(int messageId, [FromBody] EditMessageRequestDto request)
         {
             var authenticatedUserId = _httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -80,7 +100,7 @@ namespace ChatApi.Controllers
 
             }
 
-            var message = await _context.Messages.FirstOrDefaultAsync(m => m.id == messageId);
+            var message = await _context.Messages.FirstOrDefaultAsync(m => m.messageId == messageId);
 
             if (message == null)
             {
@@ -96,8 +116,7 @@ namespace ChatApi.Controllers
             return Ok("Message edited successfully");
         }
 
-        [HttpDelete]
-        [Route("api/messages/{messageId}")]
+        [HttpDelete("{messageId}")]
         public async Task<IActionResult> DeleteMessage(int messageId)
         {
             var authenticatedUserId = _httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -108,7 +127,7 @@ namespace ChatApi.Controllers
 
             }
 
-            var message = await _context.Messages.FirstOrDefaultAsync(m => m.id == messageId);
+            var message = await _context.Messages.FirstOrDefaultAsync(m => m.messageId == messageId);
 
             if (message.senderId != Convert.ToInt32(authenticatedUserId))
             {
@@ -121,18 +140,18 @@ namespace ChatApi.Controllers
             return Ok("Message Deleted Successfully");
         }
 
-        [HttpGet("history")]
+        [HttpGet]
         public async Task<IActionResult> GetConversationHisotry(int userId, DateTime before, int count = 20, string sort = "asc")
         {
 
             var authenticatedUserId = _httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-            var conversation = _context.Messages.Where(m => (m.senderId == Convert.ToInt32(authenticatedUserId) && m.receiverId == userId) ||
+            var conversation = _context.Messages.Include(m => m.sender).Include(m => m.receiver).Where(m => (m.senderId == Convert.ToInt32(authenticatedUserId) && m.receiverId == userId) ||
                                                                   (m.senderId == userId && m.receiverId == Convert.ToInt32(authenticatedUserId)));
 
-            
 
-            if (!await _context.Users.AnyAsync(u => u.id == userId))
+
+            if (!await _context.Users.AnyAsync(u => u.userId == userId))
                 return Conflict(new { message = "User does not exist" });
 
 
@@ -157,28 +176,36 @@ namespace ChatApi.Controllers
             }
             conversation = sort == "desc" ? conversation.OrderByDescending(m => m.timestamp) : conversation.OrderBy(m => m.timestamp);
 
-            
 
-            var chat = await conversation
-                        .Take(count)
-                        .ToListAsync();
 
-            if (chat.Count == null)
+            //var chat = await conversation
+            //            .Take(count)
+            //            .ToListAsync();
+
+            var chat = await conversation.Select(m => new
+            {
+                id = m.messageId,
+                senderId = m.senderId,
+                receiverId = m.receiverId,
+                content = m.content,
+                timestamp = m.timestamp,
+            }).Take(count).ToListAsync();
+
+            if (chat.Count == 0)
             {
                 return NotFound("Conversation does not exist");
             }
 
-
-
-
-
-
-
-
-
-
-
             return Ok(chat);
+
+            //var options = new JsonSerializerOptions
+            //{
+            //    ReferenceHandler = ReferenceHandler.Preserve
+            //};
+
+            //var json = JsonSerializer.Serialize(chat, options);
+
+            //return Ok(json);
 
         }
 

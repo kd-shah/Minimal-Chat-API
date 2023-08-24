@@ -24,11 +24,11 @@ namespace ChatApi.Migrations
 
             modelBuilder.Entity("ChatApi.Model.Message", b =>
                 {
-                    b.Property<int>("id")
+                    b.Property<int>("messageId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("messageId"));
 
                     b.Property<string>("content")
                         .IsRequired()
@@ -43,18 +43,22 @@ namespace ChatApi.Migrations
                     b.Property<DateTime>("timestamp")
                         .HasColumnType("datetime2");
 
-                    b.HasKey("id");
+                    b.HasKey("messageId");
+
+                    b.HasIndex("receiverId");
+
+                    b.HasIndex("senderId");
 
                     b.ToTable("Messages");
                 });
 
             modelBuilder.Entity("ChatApi.Model.User", b =>
                 {
-                    b.Property<int>("id")
+                    b.Property<int>("userId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("userId"));
 
                     b.Property<string>("email")
                         .IsRequired()
@@ -72,9 +76,33 @@ namespace ChatApi.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.HasKey("id");
+                    b.HasKey("userId");
 
                     b.ToTable("users", (string)null);
+                });
+
+            modelBuilder.Entity("ChatApi.Model.Message", b =>
+                {
+                    b.HasOne("ChatApi.Model.User", "receiver")
+                        .WithMany("receivedMessages")
+                        .HasForeignKey("receiverId")
+                        .IsRequired();
+
+                    b.HasOne("ChatApi.Model.User", "sender")
+                        .WithMany("sentMessages")
+                        .HasForeignKey("senderId")
+                        .IsRequired();
+
+                    b.Navigation("receiver");
+
+                    b.Navigation("sender");
+                });
+
+            modelBuilder.Entity("ChatApi.Model.User", b =>
+                {
+                    b.Navigation("receivedMessages");
+
+                    b.Navigation("sentMessages");
                 });
 #pragma warning restore 612, 618
         }
