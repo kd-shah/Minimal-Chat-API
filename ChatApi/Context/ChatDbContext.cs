@@ -12,6 +12,8 @@ namespace ChatApi.Context
         public DbSet<Model.User> Users { get; set; }
         public DbSet<Model.Message> Messages { get; set; }
 
+        public DbSet<Model.Log> Logs { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Model.User>().ToTable("users");
