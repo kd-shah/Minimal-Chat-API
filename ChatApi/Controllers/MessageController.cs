@@ -177,11 +177,6 @@ namespace ChatApi.Controllers
             conversation = sort == "desc" ? conversation.OrderByDescending(m => m.timestamp) : conversation.OrderBy(m => m.timestamp);
 
 
-
-            //var chat = await conversation
-            //            .Take(count)
-            //            .ToListAsync();
-
             var chat = await conversation.Select(m => new
             {
                 id = m.messageId,
@@ -198,14 +193,6 @@ namespace ChatApi.Controllers
 
             return Ok(chat);
 
-            //var options = new JsonSerializerOptions
-            //{
-            //    ReferenceHandler = ReferenceHandler.Preserve
-            //};
-
-            //var json = JsonSerializer.Serialize(chat, options);
-
-            //return Ok(json);
 
         }
 
