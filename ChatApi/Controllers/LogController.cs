@@ -2,8 +2,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ChatApi.Context;
-using ChatApi.Model;
-using System;
 
 namespace ChatApi.Controllers
 {
@@ -31,7 +29,7 @@ namespace ChatApi.Controllers
                 .Where(log => log.timeStamp >= parsedStartTime && log.timeStamp <= parsedEndTime)
                 .ToListAsync();
             if (logs.Count == 0)
-                return NotFound();
+                return NotFound("no log found");
             return Ok(logs);
         }
         private DateTime? ParseDateTime(string dateTimeString)
