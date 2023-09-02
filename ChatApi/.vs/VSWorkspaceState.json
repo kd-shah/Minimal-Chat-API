@@ -1,8 +1,9 @@
 {
   "ExpandedNodes": [
     "",
-    "\\Controllers"
+    "\\Controllers",
+    "\\Middleware"
   ],
-  "SelectedNode": "\\ChatApi.sln",
+  "SelectedNode": "\\Controllers\\LogController.cs",
   "PreviewInSolutionExplorer": false
 }

@@ -65,7 +65,18 @@ namespace ChatApi
             }
             );
 
-            
+
+            // Configure CORS
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("SwaggerPolicy", builder =>
+                {
+                    builder.WithOrigins("http://localhost:4200")
+                           .AllowAnyHeader()
+                           .AllowAnyMethod();
+                });
+            });
+
 
 
             var app = builder.Build();
@@ -80,6 +91,9 @@ namespace ChatApi
             
 
             app.UseHttpsRedirection();
+
+            // Use CORS Middleware for Swagger UI endpoints
+            app.UseCors("SwaggerPolicy");
 
             app.UseAuthentication();
 

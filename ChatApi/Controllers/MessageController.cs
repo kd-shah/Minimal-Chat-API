@@ -113,7 +113,7 @@ namespace ChatApi.Controllers
             }
             message.content = request.content;
             await _context.SaveChangesAsync();
-            return Ok("Message edited successfully");
+            return Ok(new { message = "Message edited successfully" });
         }
 
         [HttpDelete("{messageId}")]
@@ -137,11 +137,11 @@ namespace ChatApi.Controllers
             _context.Messages.Remove(message);
             await _context.SaveChangesAsync();
 
-            return Ok("Message Deleted Successfully");
+            return Ok(new { message = "Message Deleted successfully" });
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetConversationHisotry(int userId, DateTime before, int count = 20, string sort = "asc")
+        public async Task<IActionResult> GetConversationHisotry(int userId, DateTime before, int count = 20, string sort = "desc")
         {
 
             var authenticatedUserId = _httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -174,8 +174,8 @@ namespace ChatApi.Controllers
             {
                 return BadRequest("Invalid Request Parameter : Chat Count cannot be zero or negative");
             }
-            conversation = sort == "desc" ? conversation.OrderByDescending(m => m.timestamp) : conversation.OrderBy(m => m.timestamp);
-
+            //conversation = sort == "desc" ? conversation.OrderByDescending(m => m.timestamp) : conversation.OrderBy(m => m.timestamp);
+            conversation = sort == "asc" ? conversation.OrderBy(m => m.timestamp) : conversation.OrderByDescending(m => m.timestamp);
 
             var chat = await conversation.Select(m => new
             {
@@ -188,7 +188,8 @@ namespace ChatApi.Controllers
 
             if (chat.Count == 0)
             {
-                return NotFound("Conversation does not exist");
+                //return NotFound("Conversation does not exist");
+                return Ok(new List<object>());
             }
 
             return Ok(chat);
