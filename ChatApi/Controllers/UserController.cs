@@ -52,7 +52,7 @@ namespace ChatApi.Controllers
 
             var userRes = new
             {
-                id = user.userId,
+                userId = user.userId,
                 name = user.name,
                 email = user.email,
 
@@ -98,9 +98,9 @@ namespace ChatApi.Controllers
             _authContext.Users.Add(newUser);
             await _authContext.SaveChangesAsync();
 
-            var userResponse = new
+            var userResponse = new Model.RegisterResponseDto
             {
-                id = newUser.userId,
+                userId = newUser.userId,
                 name = newUser.name,
                 email = newUser.email,
             };
